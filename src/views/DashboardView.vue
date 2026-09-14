@@ -128,9 +128,9 @@ onMounted(() => {
   <div>
     <h1>Mi panel</h1>
 
-    <section>
+    <section class="panel">
       <h2>Crear nuevo catálogo</h2>
-      <form @submit.prevent="handleCreateCatalog">
+      <form @submit.prevent="handleCreateCatalog" class="form-grid">
         <div>
           <label for="catalogName">Nombre</label>
           <input id="catalogName" v-model="name" type="text" required />
@@ -139,43 +139,47 @@ onMounted(() => {
           <label for="catalogDescription">Descripción</label>
           <input id="catalogDescription" v-model="description" type="text" />
         </div>
-        <p v-if="errorMessage">{{ errorMessage }}</p>
+        <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
         <button type="submit" :disabled="creating">
           {{ creating ? "Creando..." : "Crear catálogo" }}
         </button>
       </form>
     </section>
 
-    <section>
-  <h2>Mis catálogos</h2>
-  <p v-if="loading">Cargando...</p>
-  <p v-else-if="myCatalogs.length === 0">Todavía no tienes catálogos.</p>
-  <ul v-else>
-    <li v-for="catalog in myCatalogs" :key="catalog.id">
-      <div v-if="editingCatalogId === catalog.id">
-        <input v-model="editName" type="text" />
-        <input v-model="editDescription" type="text" />
-        <button @click="handleUpdateCatalog(catalog.id)">Guardar</button>
-        <button @click="cancelEdit">Cancelar</button>
-      </div>
-      <div v-else>
-        <RouterLink :to="`/catalogs/${catalog.id}`">{{ catalog.name }}</RouterLink>
-        — {{ catalog.description }}
-        <button @click="startEdit(catalog)">Editar</button>
-        <button @click="handleDeleteCatalog(catalog.id)">Borrar</button>
-      </div>
-    </li>
-  </ul>
-</section>
+    <section class="panel">
+      <h2>Mis catálogos</h2>
+      <p v-if="loading" class="muted">Cargando...</p>
+      <p v-else-if="myCatalogs.length === 0" class="muted">Todavía no tienes catálogos.</p>
+      <ul v-else class="catalog-list">
+        <li v-for="catalog in myCatalogs" :key="catalog.id">
+          <div v-if="editingCatalogId === catalog.id" class="edit-row">
+            <input v-model="editName" type="text" />
+            <input v-model="editDescription" type="text" />
+            <button @click="handleUpdateCatalog(catalog.id)">Guardar</button>
+            <button class="ghost-btn" @click="cancelEdit">Cancelar</button>
+          </div>
+          <div v-else class="catalog-row">
+            <div>
+              <RouterLink :to="`/catalogs/${catalog.id}`">{{ catalog.name }}</RouterLink>
+              <span class="muted"> — {{ catalog.description }}</span>
+            </div>
+            <div class="row-actions">
+              <button class="ghost-btn" @click="startEdit(catalog)">Editar</button>
+              <button class="ghost-btn danger" @click="handleDeleteCatalog(catalog.id)">Borrar</button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
 
-    <section>
+    <section class="panel">
       <h2>Agregar producto</h2>
 
-      <p v-if="myCatalogs.length === 0">
+      <p v-if="myCatalogs.length === 0" class="muted">
         Primero necesitas crear un catálogo antes de agregar productos.
       </p>
 
-      <form v-else @submit.prevent="handleCreateProduct">
+      <form v-else @submit.prevent="handleCreateProduct" class="form-grid">
         <div>
           <label for="productCatalog">Catálogo</label>
           <select id="productCatalog" v-model="selectedCatalogId" required>
@@ -208,15 +212,15 @@ onMounted(() => {
 
         <div>
           <label for="productPrice">Precio</label>
-          <input id="productPrice" v-model="productPrice" type="number" step="0.01" required />
+          <input id="productPrice" v-model="productPrice" type="number" step="0.01" min="0.01" required />
         </div>
 
         <div>
           <label for="productStock">Stock</label>
-          <input id="productStock" v-model="productStock" type="number" required />
+          <input id="productStock" v-model="productStock" type="number" min="0" required />
         </div>
 
-        <p v-if="productErrorMessage">{{ productErrorMessage }}</p>
+        <p v-if="productErrorMessage" class="error">{{ productErrorMessage }}</p>
 
         <button type="submit" :disabled="creatingProduct">
           {{ creatingProduct ? "Creando..." : "Crear producto" }}
@@ -225,3 +229,86 @@ onMounted(() => {
     </section>
   </div>
 </template>
+
+<style scoped>
+.panel {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.form-grid button {
+  height: fit-content;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.error {
+  color: #E24B4A;
+  font-size: 0.85rem;
+  grid-column: 1 / -1;
+}
+
+.catalog-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.catalog-list li {
+  border-top: 1px solid var(--border);
+  padding: 0.9rem 0;
+}
+
+.catalog-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.row-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.edit-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.edit-row input {
+  width: auto;
+}
+
+.ghost-btn {
+  background-color: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.ghost-btn:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+  opacity: 1;
+}
+
+.ghost-btn.danger:hover {
+  color: #E24B4A;
+  border-color: #E24B4A;
+}
+</style>
