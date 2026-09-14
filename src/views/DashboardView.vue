@@ -27,6 +27,13 @@ const selectedCategoryId = ref("");
 const productErrorMessage = ref("");
 const creatingProduct = ref(false);
 
+const productImageFile = ref(null);
+const uploadingImage = ref(false);
+
+function handleImageChange(event) {
+  productImageFile.value = event.target.files[0];
+}
+
 async function fetchMyCatalogs() {
   loading.value = true;
   try {
@@ -65,6 +72,20 @@ async function handleCreateProduct() {
   creatingProduct.value = true;
 
   try {
+    let imageUrl = "";
+
+    if (productImageFile.value) {
+      uploadingImage.value = true;
+      const formData = new FormData();
+      formData.append("image", productImageFile.value);
+
+      const uploadResponse = await api.post("/products/upload-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      imageUrl = uploadResponse.data.imageUrl;
+      uploadingImage.value = false;
+    }
+
     await api.post("/products", {
       name: productName.value,
       description: productDescription.value,
@@ -72,11 +93,14 @@ async function handleCreateProduct() {
       stock: Number(productStock.value),
       catalogId: selectedCatalogId.value,
       categoryId: selectedCategoryId.value,
+      imageUrl,
     });
+
     productName.value = "";
     productDescription.value = "";
     productPrice.value = "";
     productStock.value = "";
+    productImageFile.value = null;
   } catch (error) {
     productErrorMessage.value = error.response?.data?.error || "Error al crear el producto";
   } finally {
@@ -208,6 +232,11 @@ onMounted(() => {
         <div>
           <label for="productDescription">Descripción</label>
           <input id="productDescription" v-model="productDescription" type="text" />
+        </div>
+
+        <div>
+          <label for="productImage">Foto del producto</label>
+          <input id="productImage" type="file" accept="image/*" @change="handleImageChange" />
         </div>
 
         <div>
