@@ -12,7 +12,15 @@ defineProps({
 </script>
 
 <template>
+
+  
   <div class="product-card">
+
+    <div class="product-image">
+      <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" />
+      <div v-else class="image-placeholder">Sin foto</div>
+    </div>
+
     <div class="product-card__body">
       <h3>{{ product.name }}</h3>
       <p v-if="product.description" class="description">{{ product.description }}</p>
@@ -90,5 +98,28 @@ defineProps({
 .catalog-link {
   font-size: 0.85rem;
   align-self: flex-start;
+}
+
+.product-image {
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: var(--bg);
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
 }
 </style>
